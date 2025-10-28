@@ -16,11 +16,13 @@ namespace MoneyBoard.ViewModels
     {
         private readonly ICsvService _csvService;
         private readonly IRepository<Transaction> _transactionRepository;
+        private readonly IRepository<Mapping> _mappingRepository;
 
-        public MainPageViewModel(ICsvService csvService, IRepository<Transaction> transactionRepository)
+        public MainPageViewModel(ICsvService csvService, IRepository<Transaction> transactionRepository, IRepository<Mapping> mappingRepository)
         {
             _csvService = csvService;
             _transactionRepository = transactionRepository;
+            _mappingRepository = mappingRepository;
         }
 
         [RelayCommand]
@@ -33,9 +35,19 @@ namespace MoneyBoard.ViewModels
 
                 if (transactions != null && transactions.Any())
                 {
+                    // Load all existing mappings into a dictionary for performance
+                    var mappings = (await _mappingRepository.GetAllAsync())
+                                    .ToDictionary(m => m.UsageName, m => m.CategoryId);
+
                     var newTransactions = new List<Transaction>();
                     foreach (var t in transactions)
                     {
+                        // Apply mapping if exists
+                        if (mappings.TryGetValue(t.UsageName, out var categoryId))
+                        {
+                            t.CategoryId = categoryId;
+                        }
+
                         var exists = await _transactionRepository.FindAsync(x => x.UsageDate == t.UsageDate && x.UsageName == t.UsageName && x.Amount == t.Amount);
                         if (!exists.Any())
                         {
