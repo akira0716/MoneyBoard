@@ -25,10 +25,10 @@
             </CollectionView.Header>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:CategorySummary">
-                    <Grid ColumnDefinitions="*,Auto,Auto" Padding="5">
+                    <Grid ColumnDefinitions="Auto, *, Auto, Auto" Padding="5" ColumnSpacing="10">
                         <Label Grid.Column="0" Text="{Binding CategoryName}"/>
-                        <Label Grid.Column="1" Text="{Binding TotalAmount, StringFormat='{0:C}'}" HorizontalTextAlignment="End"/>
-                        <Label Grid.Column="2" Text="{Binding Percentage, StringFormat='{0:F2}%'}" HorizontalTextAlignment="End"/>
+                        <Label Grid.Column="2" Text="{Binding TotalAmount, StringFormat='{0:C}'}" HorizontalTextAlignment="End"/>
+                        <Label Grid.Column="3" Text="{Binding Percentage, StringFormat='{0:F2}%'}" HorizontalTextAlignment="End"/>
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
