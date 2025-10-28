@@ -1,17 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using MoneyBoard.Data;
 
 namespace MoneyBoard
 {
     public partial class App : Application
     {
-        public App()
+        public App(ApplicationDbContext context)
         {
             InitializeComponent();
-        }
 
-        protected override Window CreateWindow(IActivationState? activationState)
-        {
-            return new Window(new AppShell());
+            context.Database.EnsureCreated();
+
+            MainPage = new AppShell();
         }
     }
 }
