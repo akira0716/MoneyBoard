@@ -9,6 +9,7 @@ namespace MoneyBoard
             InitializeComponent();
 
             Routing.RegisterRoute(nameof(CategoryManagementPage), typeof(CategoryManagementPage));
+            Routing.RegisterRoute(nameof(UncategorizedTransactionsPage), typeof(UncategorizedTransactionsPage));
         }
     }
 }

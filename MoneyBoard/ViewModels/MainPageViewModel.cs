@@ -86,5 +86,11 @@ namespace MoneyBoard.ViewModels
         {
             await Shell.Current.GoToAsync("CategoryManagementPage");
         }
+
+        [RelayCommand]
+        private async Task GoToUncategorizedTransactionsAsync()
+        {
+            await Shell.Current.GoToAsync("UncategorizedTransactionsPage");
+        }
     }
 }

@@ -36,6 +36,9 @@ namespace MoneyBoard
             builder.Services.AddTransient<ViewModels.CategoryManagementViewModel>();
             builder.Services.AddTransient<Views.CategoryManagementPage>();
 
+            builder.Services.AddTransient<ViewModels.UncategorizedTransactionsViewModel>();
+            builder.Services.AddTransient<Views.UncategorizedTransactionsPage>();
+
             return builder.Build();
         }
     }

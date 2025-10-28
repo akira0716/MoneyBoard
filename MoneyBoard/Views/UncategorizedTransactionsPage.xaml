@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MoneyBoard.Views.UncategorizedTransactionsPage"
+             Title="Uncategorized Transactions">
+    <Grid RowDefinitions="*, Auto" Padding="10" RowSpacing="10">
+        
+        <CollectionView Grid.Row="0"
+                        ItemsSource="{Binding UncategorizedUsageNames}"
+                        SelectedItem="{Binding SelectedUsageName}"
+                        SelectionMode="Single">
+            <CollectionView.Header>
+                <Label Text="Select a usage name to categorize:" FontAttributes="Bold" Padding="5"/>
+            </CollectionView.Header>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <Frame Padding="10" Margin="5">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup Name="CommonStates">
+                                <VisualState Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="Transparent" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState Name="Selected">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="LightBlue" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Label Text="{Binding .}" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout Grid.Row="1" Spacing="10" IsVisible="{Binding IsUsageNameSelected}">
+            <Picker Title="Select Category"
+                    ItemsSource="{Binding AvailableCategories}"
+                    ItemDisplayBinding="{Binding Name}"
+                    SelectedItem="{Binding SelectedCategory}"/>
+            <Button Text="Assign Category and Create Mapping"
+                    Command="{Binding AssignCategoryCommand}"/>
+        </VerticalStackLayout>
+        
+    </Grid>
+</ContentPage>
