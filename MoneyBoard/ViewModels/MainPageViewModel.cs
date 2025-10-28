@@ -68,5 +68,11 @@ namespace MoneyBoard.ViewModels
                 await Application.Current.MainPage.DisplayAlert("Error", "An unexpected error occurred during the import process. Please check the logs.", "OK");
             }
         }
+
+        [RelayCommand]
+        private async Task GoToCategoryManagementAsync()
+        {
+            await Shell.Current.GoToAsync("CategoryManagementPage");
+        }
     }
 }

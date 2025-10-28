@@ -33,6 +33,9 @@ namespace MoneyBoard
 
             builder.Services.AddScoped(typeof(Data.IRepository<>), typeof(Data.Repository<>));
 
+            builder.Services.AddTransient<ViewModels.CategoryManagementViewModel>();
+            builder.Services.AddTransient<Views.CategoryManagementPage>();
+
             return builder.Build();
         }
     }

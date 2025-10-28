@@ -18,6 +18,12 @@
             Text="CSVファイルを読み込む" 
             Command="{Binding LoadCsvCommand}"
             HorizontalOptions="Center" />
+
+        <Button
+            Text="カテゴリーを管理する"
+            Command="{Binding GoToCategoryManagementCommand}"
+            HorizontalOptions="Center"
+            Margin="0,10,0,0"/>
             
     </VerticalStackLayout>
 
