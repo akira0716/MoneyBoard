@@ -1,5 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using Microsoft.Maui.Controls;
 using MoneyBoard.Data;
 using MoneyBoard.Models;
 using MoneyBoard.Services;
@@ -10,7 +13,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Maui.Controls;
 
 namespace MoneyBoard.ViewModels
 {
@@ -23,6 +25,7 @@ namespace MoneyBoard.ViewModels
 
         public ObservableCollection<string> AvailableMonths { get; } = new();
         public ObservableCollection<CategorySummary> SummaryItems { get; } = new();
+        public ObservableCollection<ISeries> Series { get; set; } = new();
 
         [ObservableProperty]
         private string _selectedMonth;
@@ -46,6 +49,7 @@ namespace MoneyBoard.ViewModels
             else
             {
                 SummaryItems.Clear();
+                UpdateChart();
             }
         }
 
@@ -116,10 +120,20 @@ namespace MoneyBoard.ViewModels
                         Percentage = percentage
                     });
                 }
+                UpdateChart();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Failed to load summary for {month}: {ex.Message}");
+            }
+        }
+
+        private void UpdateChart()
+        {
+            Series.Clear();
+            foreach (var item in SummaryItems)
+            {
+                Series.Add(new PieSeries<double> { Values = new[] { (double)item.TotalAmount }, Name = item.CategoryName });
             }
         }
 
