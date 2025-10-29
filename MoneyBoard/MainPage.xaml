@@ -3,8 +3,8 @@
     x:Class="MoneyBoard.MainPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:models="clr-namespace:MoneyBoard.Models"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+    xmlns:models="clr-namespace:MoneyBoard.Models"
     Title="MoneyBoard">
 
     <Grid
@@ -19,7 +19,10 @@
             ItemsSource="{Binding AvailableMonths}"
             SelectedItem="{Binding SelectedMonth}" />
 
-        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="20">
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,*"
+            ColumnSpacing="20">
             <!--  Summary Display  -->
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>

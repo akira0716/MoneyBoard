@@ -1,20 +1,33 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MoneyBoard.Views.UncategorizedTransactionsPage"
-             Title="Uncategorized Transactions">
-    <Grid RowDefinitions="*, Auto" Padding="10" RowSpacing="10">
-        
-        <CollectionView Grid.Row="0"
-                        ItemsSource="{Binding UncategorizedUsageNames}"
-                        SelectedItem="{Binding SelectedUsageName}"
-                        SelectionMode="Single">
+<ContentPage
+    x:Class="MoneyBoard.Views.UncategorizedTransactionsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Uncategorized Transactions">
+    <Grid
+        Padding="10"
+        RowDefinitions="*, Auto"
+        RowSpacing="10">
+
+        <CollectionView
+            Grid.Row="0"
+            ItemsSource="{Binding UncategorizedUsageNames}"
+            SelectedItem="{Binding SelectedUsageName}"
+            SelectionMode="Single">
             <CollectionView.Header>
-                <Label Text="Select a usage name to categorize:" FontAttributes="Bold" Padding="5"/>
+                <Label
+                    Padding="5"
+                    FontAttributes="Bold"
+                    Text="Select a usage name to categorize:" />
             </CollectionView.Header>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="x:String">
-                    <Frame Padding="10" Margin="5">
+                    <Frame Margin="5" Padding="10">
+                        <Label
+                            FontAttributes="Bold"
+                            Text="{Binding .}"
+                            TextColor="{AppThemeBinding Light=Black,
+                                                        Dark=White}" />
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup Name="CommonStates">
                                 <VisualState Name="Normal">
@@ -29,20 +42,22 @@
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <Label Text="{Binding .}" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <VerticalStackLayout Grid.Row="1" Spacing="10" IsVisible="{Binding IsUsageNameSelected}">
-            <Picker Title="Select Category"
-                    ItemsSource="{Binding AvailableCategories}"
-                    ItemDisplayBinding="{Binding Name}"
-                    SelectedItem="{Binding SelectedCategory}"/>
-            <Button Text="Assign Category and Create Mapping"
-                    Command="{Binding AssignCategoryCommand}"/>
+        <VerticalStackLayout
+            Grid.Row="1"
+            IsVisible="{Binding IsUsageNameSelected}"
+            Spacing="10">
+            <Picker
+                Title="Select Category"
+                ItemDisplayBinding="{Binding Name}"
+                ItemsSource="{Binding AvailableCategories}"
+                SelectedItem="{Binding SelectedCategory}" />
+            <Button Command="{Binding AssignCategoryCommand}" Text="Assign Category and Create Mapping" />
         </VerticalStackLayout>
-        
+
     </Grid>
 </ContentPage>
