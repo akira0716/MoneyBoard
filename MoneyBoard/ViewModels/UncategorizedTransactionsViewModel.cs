@@ -2,11 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MoneyBoard.Data;
 using MoneyBoard.Models;
-using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MoneyBoard.ViewModels
 {

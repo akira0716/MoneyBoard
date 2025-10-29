@@ -1,10 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using MoneyBoard.Data;
+﻿using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.EntityFrameworkCore;
-using System.IO;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.SkiaSharpView.Maui;
+using Microsoft.Extensions.Logging;
+using MoneyBoard.Data;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace MoneyBoard
@@ -25,7 +22,7 @@ namespace MoneyBoard
                 });
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             string dbPath = Path.Combine(FileSystem.AppDataDirectory, "moneyboard.db");

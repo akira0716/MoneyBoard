@@ -2,17 +2,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
-using Microsoft.Maui.Controls;
 using MoneyBoard.Data;
 using MoneyBoard.Models;
 using MoneyBoard.Services;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MoneyBoard.ViewModels
 {
@@ -133,7 +128,12 @@ namespace MoneyBoard.ViewModels
             Series.Clear();
             foreach (var item in SummaryItems)
             {
-                Series.Add(new PieSeries<double> { Values = new[] { (double)item.TotalAmount }, Name = item.CategoryName });
+                Series.Add(new PieSeries<double>
+                {
+                    Values = new[] { (double)item.TotalAmount },
+                    Name = item.CategoryName,
+                    ToolTipLabelFormatter = (point) => $"¥{point.Model:N0}",
+                });
             }
         }
 

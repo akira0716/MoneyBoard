@@ -2,11 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MoneyBoard.Data;
 using MoneyBoard.Models;
-using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MoneyBoard.ViewModels
 {
@@ -61,7 +58,7 @@ namespace MoneyBoard.ViewModels
             // Add to collection and keep it sorted
             var sortedCategories = new ObservableCollection<Category>(Categories.Union(new[] { newCategory }).OrderBy(c => c.Name));
             Categories.Clear();
-            foreach(var c in sortedCategories) Categories.Add(c);
+            foreach (var c in sortedCategories) Categories.Add(c);
 
             NewCategoryName = string.Empty;
         }
