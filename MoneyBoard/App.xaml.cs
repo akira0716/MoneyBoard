@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using MoneyBoard.Data;
+﻿using MoneyBoard.Data;
 
 namespace MoneyBoard
 {
