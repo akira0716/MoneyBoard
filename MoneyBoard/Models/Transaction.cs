@@ -1,3 +1,5 @@
+using System;
+
 namespace MoneyBoard.Models;
 
 public class Transaction
