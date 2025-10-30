@@ -2,14 +2,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using MoneyBoard.Data;
 using MoneyBoard.Models;
 using MoneyBoard.Services;
+using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
-using SkiaSharp;
-using LiveChartsCore.SkiaSharpView.Painting;
 
 namespace MoneyBoard.ViewModels
 {
