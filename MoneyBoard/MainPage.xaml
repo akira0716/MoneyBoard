@@ -124,10 +124,18 @@
             Grid.Row="2"
             Margin="0,20,0,0"
             Spacing="10">
-            <Button
-                Command="{Binding LoadCsvCommand}"
-                HorizontalOptions="Fill"
-                Text="CSVファイルを読み込む" />
+            <Grid ColumnDefinitions="2*,*" ColumnSpacing="10">
+                <Picker
+                    Title="登録する月を選択"
+                    Grid.Column="0"
+                    ItemsSource="{Binding ImportMonthOptions}"
+                    SelectedItem="{Binding SelectedImportMonth}" />
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding LoadCsvCommand}"
+                    HorizontalOptions="Fill"
+                    Text="CSVを読込" />
+            </Grid>
 
             <Button
                 Command="{Binding GoToCategoryManagementCommand}"

@@ -10,6 +10,8 @@ using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace MoneyBoard.ViewModels
 {
@@ -19,22 +21,45 @@ namespace MoneyBoard.ViewModels
         private readonly IRepository<Transaction> _transactionRepository;
         private readonly IRepository<Mapping> _mappingRepository;
         private readonly IRepository<Category> _categoryRepository;
+        private readonly IRepository<ImportHistory> _importHistoryRepository;
 
         public ObservableCollection<string> AvailableMonths { get; } = new();
+        public ObservableCollection<string> ImportMonthOptions { get; } = new();
         public ObservableCollection<CategorySummary> SummaryItems { get; } = new();
         public ObservableCollection<ISeries> Series { get; set; } = new();
 
         [ObservableProperty]
         private string _selectedMonth;
 
-        public MainPageViewModel(ICsvService csvService, IRepository<Transaction> transactionRepository, IRepository<Mapping> mappingRepository, IRepository<Category> categoryRepository)
+        [ObservableProperty]
+        private string _selectedImportMonth;
+
+        public MainPageViewModel(
+            ICsvService csvService,
+            IRepository<Transaction> transactionRepository,
+            IRepository<Mapping> mappingRepository,
+            IRepository<Category> categoryRepository,
+            IRepository<ImportHistory> importHistoryRepository)
         {
             _csvService = csvService;
             _transactionRepository = transactionRepository;
             _mappingRepository = mappingRepository;
             _categoryRepository = categoryRepository;
+            _importHistoryRepository = importHistoryRepository;
 
             LoadAvailableMonthsAsync();
+            InitializeImportMonthOptions();
+        }
+
+        private void InitializeImportMonthOptions()
+        {
+            var currentDate = DateTime.Now;
+            for (int i = 0; i < 12; i++)
+            {
+                var date = currentDate.AddMonths(-i);
+                ImportMonthOptions.Add(date.ToString("yyyy年MM月"));
+            }
+            SelectedImportMonth = ImportMonthOptions.FirstOrDefault();
         }
 
         partial void OnSelectedMonthChanged(string value)
@@ -150,54 +175,153 @@ namespace MoneyBoard.ViewModels
         {
             try
             {
-                Debug.WriteLine("LoadCsvAsync command executed.");
-                var transactions = await _csvService.PickAndParseCsvAsync();
-
-                if (transactions != null && transactions.Any())
+                if (string.IsNullOrEmpty(SelectedImportMonth))
                 {
-                    var mappings = (await _mappingRepository.GetAllAsync())
-                                    .ToDictionary(m => m.UsageName, m => m.CategoryId);
+                    await Application.Current.MainPage.DisplayAlert("エラー", "登録する月を選択してください。", "OK");
+                    return;
+                }
 
-                    var newTransactions = new List<Transaction>();
-                    foreach (var t in transactions)
+                var targetYear = int.Parse(SelectedImportMonth.Substring(0, 4));
+                var targetMonth = int.Parse(SelectedImportMonth.Substring(5, 2));
+
+                Debug.WriteLine("LoadCsvAsync command executed.");
+                var transactions = (await _csvService.PickAndParseCsvAsync()).ToList();
+
+                if (transactions == null || !transactions.Any())
+                {
+                    Debug.WriteLine("No transactions loaded or file picker cancelled.");
+                    return;
+                }
+
+                // ファイルハッシュの計算
+                var fileHash = CalculateFileHash(transactions);
+
+                // 月の検証
+                var allowedMonths = new HashSet<(int year, int month)>
+                {
+                    (targetYear, targetMonth),
+                    (targetMonth == 1 ? targetYear - 1 : targetYear, targetMonth == 1 ? 12 : targetMonth - 1)
+                };
+
+                var invalidTransactions = transactions
+                    .Where(t => !allowedMonths.Contains((t.UsageDate.Year, t.UsageDate.Month)))
+                    .ToList();
+
+                if (invalidTransactions.Any())
+                {
+                    var invalidDates = string.Join(", ",
+                        invalidTransactions
+                            .Select(t => t.UsageDate.ToString("yyyy年MM月"))
+                            .Distinct()
+                            .OrderBy(d => d));
+
+                    await Application.Current.MainPage.DisplayAlert(
+                        "エラー",
+                        $"選択した月とその前月以外のデータが含まれています。\n含まれている月: {invalidDates}",
+                        "OK");
+                    return;
+                }
+
+                // 既存のインポート履歴をチェック
+                var existingHistory = (await _importHistoryRepository.FindAsync(h =>
+                    h.Year == targetYear && h.Month == targetMonth)).FirstOrDefault();
+
+                if (existingHistory != null)
+                {
+                    if (existingHistory.FileHash == fileHash)
                     {
-                        if (mappings.TryGetValue(t.UsageName, out var categoryId))
-                        {
-                            t.CategoryId = categoryId;
-                        }
-
-                        var exists = await _transactionRepository.FindAsync(x => x.UsageDate == t.UsageDate && x.UsageName == t.UsageName && x.Amount == t.Amount);
-                        if (!exists.Any())
-                        {
-                            newTransactions.Add(t);
-                        }
-                    }
-
-                    if (newTransactions.Any())
-                    {
-                        await _transactionRepository.AddRangeAsync(newTransactions);
-                        var savedCount = await _transactionRepository.SaveChangesAsync();
-
-                        Debug.WriteLine($"{savedCount} transactions saved to database.");
-                        await Application.Current.MainPage.DisplayAlert("Success", $"{savedCount} new transactions have been successfully imported.", "OK");
-                        await LoadAvailableMonthsAsync(); // Refresh months after import
+                        await Application.Current.MainPage.DisplayAlert(
+                            "情報",
+                            $"{SelectedImportMonth}は既に同じ内容で登録済みです。",
+                            "OK");
+                        return;
                     }
                     else
                     {
-                        await Application.Current.MainPage.DisplayAlert("Info", "No new transactions to import. All records in the file already exist in the database.", "OK");
+                        var result = await Application.Current.MainPage.DisplayAlert(
+                            "警告",
+                            $"{SelectedImportMonth}は既に登録済みですが、ファイルの内容が異なります。\n上書きしますか？",
+                            "はい",
+                            "いいえ");
+
+                        if (!result)
+                            return;
+
+                        // 既存のトランザクションを削除
+                        var existingTransactions = await _transactionRepository.FindAsync(t =>
+                            t.UsageDate.Year == targetYear && t.UsageDate.Month == targetMonth);
+
+                        foreach (var t in existingTransactions)
+                        {
+                            _transactionRepository.Delete(t);
+                        }
+                        await _transactionRepository.SaveChangesAsync();
+
+                        // 履歴を更新
+                        _importHistoryRepository.Delete(existingHistory);
+                        await _importHistoryRepository.SaveChangesAsync();
                     }
                 }
-                else
+
+                // マッピングの適用
+                var mappings = (await _mappingRepository.GetAllAsync())
+                                .ToDictionary(m => m.UsageName, m => m.CategoryId);
+
+                foreach (var t in transactions)
                 {
-                    Debug.WriteLine("No transactions loaded or file picker cancelled.");
-                    await Application.Current.MainPage.DisplayAlert("Info", "No transactions were loaded from the file.", "OK");
+                    if (mappings.TryGetValue(t.UsageName, out var categoryId))
+                    {
+                        t.CategoryId = categoryId;
+                    }
                 }
+
+                // トランザクションの保存
+                await _transactionRepository.AddRangeAsync(transactions);
+                await _transactionRepository.SaveChangesAsync();
+
+                // インポート履歴の保存
+                var history = new ImportHistory
+                {
+                    Year = targetYear,
+                    Month = targetMonth,
+                    FileHash = fileHash,
+                    ImportedAt = DateTime.Now,
+                    TransactionCount = transactions.Count
+                };
+                await _importHistoryRepository.AddAsync(history);
+                await _importHistoryRepository.SaveChangesAsync();
+
+                Debug.WriteLine($"{transactions.Count} transactions saved to database.");
+                await Application.Current.MainPage.DisplayAlert(
+                    "成功",
+                    $"{SelectedImportMonth}に{transactions.Count}件の取引データを登録しました。",
+                    "OK");
+
+                await LoadAvailableMonthsAsync();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"An error occurred during CSV import: {ex.Message}");
-                await Application.Current.MainPage.DisplayAlert("Error", "An unexpected error occurred during the import process. Please check the logs.", "OK");
+                await Application.Current.MainPage.DisplayAlert(
+                    "エラー",
+                    "インポート中にエラーが発生しました。詳細はログを確認してください。",
+                    "OK");
             }
+        }
+
+        private string CalculateFileHash(List<Transaction> transactions)
+        {
+            // トランザクションの内容からハッシュを計算
+            var sb = new StringBuilder();
+            foreach (var t in transactions.OrderBy(x => x.UsageDate).ThenBy(x => x.UsageName))
+            {
+                sb.AppendLine($"{t.UsageDate:yyyyMMdd}|{t.UsageName}|{t.Amount}");
+            }
+
+            using var sha256 = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+            var hash = sha256.ComputeHash(bytes);
+            return BitConverter.ToString(hash).Replace("-", "");
         }
 
         [RelayCommand]
@@ -217,7 +341,6 @@ namespace MoneyBoard.ViewModels
         {
             if (summary == null) return;
 
-            // カテゴリーIDを取得
             var categories = await _categoryRepository.GetAllAsync();
             var category = categories.FirstOrDefault(c => c.Name == summary.CategoryName);
 
