@@ -137,6 +137,9 @@ namespace MoneyBoard.ViewModels
                     Values = new[] { (double)item.TotalAmount },
                     Name = item.CategoryName,
                     ToolTipLabelFormatter = (point) => $"¥{point.Model:N0}",
+                    DataLabelsFormatter = (_) => $"{item.CategoryName}",
+                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                    DataLabelsPaint = new SolidColorPaint(SKColors.White),
                     Fill = item.ColorHex != null ? new SolidColorPaint(SKColor.Parse(item.ColorHex)) : null
                 });
             }
