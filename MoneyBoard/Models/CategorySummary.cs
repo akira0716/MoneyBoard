@@ -5,5 +5,6 @@ namespace MoneyBoard.Models
         public string CategoryName { get; set; }
         public int TotalAmount { get; set; }
         public double Percentage { get; set; }
+        public string ColorHex { get; set; }
     }
 }

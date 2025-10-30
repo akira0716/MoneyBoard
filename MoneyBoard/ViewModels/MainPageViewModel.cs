@@ -8,6 +8,8 @@ using MoneyBoard.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
+using SkiaSharp;
+using LiveChartsCore.SkiaSharpView.Painting;
 
 namespace MoneyBoard.ViewModels
 {
@@ -91,7 +93,7 @@ namespace MoneyBoard.ViewModels
 
                 var totalAmountInMonth = transactionsInMonth.Sum(t => t.Amount);
 
-                var categories = (await _categoryRepository.GetAllAsync()).ToDictionary(c => c.Id, c => c.Name);
+                var categories = (await _categoryRepository.GetAllAsync()).ToDictionary(c => c.Id, c => c);
 
                 var groupedTransactions = transactionsInMonth
                                             .Where(t => t.CategoryId.HasValue)
@@ -105,14 +107,16 @@ namespace MoneyBoard.ViewModels
 
                 foreach (var group in groupedTransactions)
                 {
-                    var categoryName = categories.TryGetValue(group.CategoryId, out var name) ? name : "未分類";
+                    var category = categories.TryGetValue(group.CategoryId, out var cat) ? cat : null;
+                    var categoryName = category?.Name ?? "未分類";
                     var percentage = (double)group.TotalAmount / totalAmountInMonth * 100;
 
                     SummaryItems.Add(new CategorySummary
                     {
                         CategoryName = categoryName,
                         TotalAmount = group.TotalAmount,
-                        Percentage = percentage
+                        Percentage = percentage,
+                        ColorHex = category?.ColorHex
                     });
                 }
                 UpdateChart();
@@ -133,6 +137,7 @@ namespace MoneyBoard.ViewModels
                     Values = new[] { (double)item.TotalAmount },
                     Name = item.CategoryName,
                     ToolTipLabelFormatter = (point) => $"¥{point.Model:N0}",
+                    Fill = item.ColorHex != null ? new SolidColorPaint(SKColor.Parse(item.ColorHex)) : null
                 });
             }
         }
