@@ -4,16 +4,10 @@ using MoneyBoard.Data;
 using MoneyBoard.Models;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace MoneyBoard.ViewModels
 {
-    public class ColorItem
-    {
-        public string Name { get; set; }
-        public Color Color { get; set; }
-        public string HexCode { get; set; }
-    }
-
     public partial class CategoryManagementViewModel : ObservableObject
     {
         private readonly IRepository<Category> _categoryRepository;
@@ -22,44 +16,14 @@ namespace MoneyBoard.ViewModels
         private string _newCategoryName;
 
         [ObservableProperty]
-        private ColorItem _selectedColorItem;
+        private string _categoryColor;
 
         public ObservableCollection<Category> Categories { get; } = new();
-
-        public ObservableCollection<ColorItem> AvailableColors { get; set; }
-
-        public Color SelectedColor => SelectedColorItem?.Color ?? Colors.Gray;
 
         public CategoryManagementViewModel(IRepository<Category> categoryRepository)
         {
             _categoryRepository = categoryRepository;
-
-            // �Œ�J���[���X�g�̏�����
-            AvailableColors = new ObservableCollection<ColorItem>
-            {
-                new ColorItem { Name = "Red", Color = Color.FromArgb("#FF0000"), HexCode = "#FF0000" },
-                new ColorItem { Name = "Blue", Color = Color.FromArgb("#0000FF"), HexCode = "#0000FF" },
-                new ColorItem { Name = "Green", Color = Color.FromArgb("#00FF00"), HexCode = "#00FF00" },
-                new ColorItem { Name = "Yellow", Color = Color.FromArgb("#FFFF00"), HexCode = "#FFFF00" },
-                new ColorItem { Name = "Orange", Color = Color.FromArgb("#FFA500"), HexCode = "#FFA500" },
-                new ColorItem { Name = "Purple", Color = Color.FromArgb("#800080"), HexCode = "#800080" },
-                new ColorItem { Name = "Pink", Color = Color.FromArgb("#FFC0CB"), HexCode = "#FFC0CB" },
-                new ColorItem { Name = "Cyan", Color = Color.FromArgb("#00FFFF"), HexCode = "#00FFFF" },
-                new ColorItem { Name = "Gray", Color = Color.FromArgb("#808080"), HexCode = "#808080" },
-                new ColorItem { Name = "Brown", Color = Color.FromArgb("#A52A2A"), HexCode = "#A52A2A" },
-                new ColorItem { Name = "Teal", Color = Color.FromArgb("#008080"), HexCode = "#008080" },
-                new ColorItem { Name = "Lime", Color = Color.FromArgb("#32CD32"), HexCode = "#32CD32" }
-            };
-
-            // �f�t�H���g�J���[��ݒ�
-            SelectedColorItem = AvailableColors[0];
-
             LoadCategoriesAsync();
-        }
-
-        partial void OnSelectedColorItemChanged(ColorItem value)
-        {
-            OnPropertyChanged(nameof(SelectedColor));
         }
 
         private async Task LoadCategoriesAsync()
@@ -91,10 +55,13 @@ namespace MoneyBoard.ViewModels
                 return;
             }
 
+            // カラーコードのバリデーションと正規化
+            string colorHex = NormalizeColorHex(CategoryColor);
+
             var newCategory = new Category
             {
                 Name = NewCategoryName,
-                ColorHex = SelectedColorItem.HexCode
+                ColorHex = colorHex
             };
 
             await _categoryRepository.AddAsync(newCategory);
@@ -108,9 +75,8 @@ namespace MoneyBoard.ViewModels
             foreach (var c in sortedCategories)
                 Categories.Add(c);
 
-            // ���͂��N���A
             NewCategoryName = string.Empty;
-            SelectedColorItem = AvailableColors[0]; // �f�t�H���g�ɖ߂�
+            CategoryColor = string.Empty;
         }
 
         [RelayCommand]
@@ -122,6 +88,27 @@ namespace MoneyBoard.ViewModels
             _categoryRepository.Delete(category);
             await _categoryRepository.SaveChangesAsync();
             Categories.Remove(category);
+        }
+
+        /// <summary>
+        /// カラーコードを検証して正規化します
+        /// </summary>
+        private string NormalizeColorHex(string colorInput)
+        {
+            if (string.IsNullOrWhiteSpace(colorInput))
+                return "#808080"; // デフォルトグレー
+
+            // #を除去
+            colorInput = colorInput.Trim().TrimStart('#');
+
+            // 6桁の16進数かチェック
+            if (Regex.IsMatch(colorInput, "^[0-9A-Fa-f]{6}$"))
+            {
+                return $"#{colorInput.ToUpper()}";
+            }
+
+            Debug.WriteLine($"Invalid color code: {colorInput}. Using default gray.");
+            return "#808080"; // 無効な場合はデフォルトグレー
         }
     }
 }
