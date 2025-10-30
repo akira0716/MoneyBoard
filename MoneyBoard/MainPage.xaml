@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
     xmlns:models="clr-namespace:MoneyBoard.Models"
+    x:Name="page"
     Title="MoneyBoard">
 
     <Grid
@@ -35,7 +36,7 @@
                     Grid.Row="0"
                     Padding="15,10"
                     BackgroundColor="#1E1E1E"
-                    ColumnDefinitions="2*,*,*">
+                    ColumnDefinitions="2*,*,*,Auto">
                     <Label
                         Grid.Column="0"
                         FontAttributes="Bold"
@@ -56,6 +57,14 @@
                         HorizontalTextAlignment="End"
                         Text="Percentage"
                         TextColor="#E0E0E0" />
+                    <Label
+                        Grid.Column="3"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        HorizontalTextAlignment="Center"
+                        Text="Detail"
+                        TextColor="#E0E0E0"
+                        WidthRequest="80" />
                 </Grid>
 
                 <!--  Scrollable Content  -->
@@ -69,7 +78,7 @@
                                 Margin="0,0,0,1"
                                 Padding="15,12"
                                 BackgroundColor="#2A2A2A"
-                                ColumnDefinitions="2*,*,*"
+                                ColumnDefinitions="2*,*,*,Auto"
                                 ColumnSpacing="10">
                                 <Label
                                     Grid.Column="0"
@@ -92,6 +101,15 @@
                                     Text="{Binding Percentage, StringFormat='{0:F1}%'}"
                                     TextColor="#B0B0B0"
                                     VerticalOptions="Center" />
+                                <Button
+                                    Grid.Column="3"
+                                    Padding="8,4"
+                                    Command="{Binding Source={x:Reference page}, Path=BindingContext.GoToCategoryDetailCommand}"
+                                    CommandParameter="{Binding}"
+                                    FontSize="12"
+                                    Text="詳細"
+                                    VerticalOptions="Center"
+                                    WidthRequest="70" />
                             </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>

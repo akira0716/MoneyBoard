@@ -211,5 +211,26 @@ namespace MoneyBoard.ViewModels
         {
             await Shell.Current.GoToAsync("UncategorizedTransactionsPage");
         }
+
+        [RelayCommand]
+        private async Task GoToCategoryDetailAsync(CategorySummary summary)
+        {
+            if (summary == null) return;
+
+            // カテゴリーIDを取得
+            var categories = await _categoryRepository.GetAllAsync();
+            var category = categories.FirstOrDefault(c => c.Name == summary.CategoryName);
+
+            if (category == null) return;
+
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "CategoryId", category.Id },
+                { "CategoryName", summary.CategoryName },
+                { "Month", SelectedMonth }
+            };
+
+            await Shell.Current.GoToAsync("CategoryDetailPage", navigationParameter);
+        }
     }
 }

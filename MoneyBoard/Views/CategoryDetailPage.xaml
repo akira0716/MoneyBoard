@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MoneyBoard.Views.CategoryDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:MoneyBoard.Models"
+    Title="{Binding CategoryName}">
+
+    <Grid
+        Padding="20"
+        RowDefinitions="Auto, Auto, *"
+        RowSpacing="15">
+
+        <!--  サマリー情報  -->
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="*, *"
+            ColumnSpacing="10">
+            <Frame
+                Grid.Column="0"
+                Padding="15"
+                BackgroundColor="#2A2A2A">
+                <VerticalStackLayout Spacing="5">
+                    <Label
+                        FontSize="12"
+                        Text="対象月"
+                        TextColor="#B0B0B0" />
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="18"
+                        Text="{Binding Month}"
+                        TextColor="#E0E0E0" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame
+                Grid.Column="1"
+                Padding="15"
+                BackgroundColor="#2A2A2A">
+                <VerticalStackLayout Spacing="5">
+                    <Label
+                        FontSize="12"
+                        Text="合計金額"
+                        TextColor="#B0B0B0" />
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="18"
+                        Text="{Binding TotalAmount, StringFormat='¥{0:N0}'}"
+                        TextColor="#90CAF9" />
+                </VerticalStackLayout>
+            </Frame>
+        </Grid>
+
+        <!--  テーブルヘッダー  -->
+        <Grid
+            Grid.Row="1"
+            Padding="15,10"
+            BackgroundColor="#1E1E1E"
+            ColumnDefinitions="2*,3*,*"
+            ColumnSpacing="10">
+            <Label
+                Grid.Column="0"
+                FontAttributes="Bold"
+                FontSize="14"
+                Text="利用日"
+                TextColor="#E0E0E0" />
+            <Label
+                Grid.Column="1"
+                FontAttributes="Bold"
+                FontSize="14"
+                Text="利用内容"
+                TextColor="#E0E0E0" />
+            <Label
+                Grid.Column="2"
+                FontAttributes="Bold"
+                FontSize="14"
+                HorizontalTextAlignment="End"
+                Text="金額"
+                TextColor="#E0E0E0" />
+        </Grid>
+
+        <!--  トランザクション一覧  -->
+        <CollectionView
+            Grid.Row="2"
+            ItemsSource="{Binding Transactions}"
+            SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Transaction">
+                    <Grid
+                        Margin="0,0,0,1"
+                        Padding="15,12"
+                        BackgroundColor="#2A2A2A"
+                        ColumnDefinitions="2*,3*,*"
+                        ColumnSpacing="10">
+                        <Label
+                            Grid.Column="0"
+                            FontSize="13"
+                            Text="{Binding UsageDate, StringFormat='{0:yyyy/MM/dd}'}"
+                            TextColor="#E0E0E0"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="1"
+                            FontSize="13"
+                            LineBreakMode="TailTruncation"
+                            Text="{Binding UsageName}"
+                            TextColor="#E0E0E0"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="2"
+                            FontAttributes="Bold"
+                            FontSize="13"
+                            HorizontalTextAlignment="End"
+                            Text="{Binding Amount, StringFormat='¥{0:N0}'}"
+                            TextColor="#90CAF9"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <ContentView>
+                    <VerticalStackLayout
+                        HorizontalOptions="Center"
+                        Spacing="10"
+                        VerticalOptions="Center">
+                        <Label
+                            FontSize="16"
+                            HorizontalOptions="Center"
+                            Text="取引データがありません"
+                            TextColor="#B0B0B0" />
+                    </VerticalStackLayout>
+                </ContentView>
+            </CollectionView.EmptyView>
+        </CollectionView>
+    </Grid>
+</ContentPage>
