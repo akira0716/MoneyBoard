@@ -11,6 +11,8 @@ namespace MoneyBoard.ViewModels
     public partial class CategoryManagementViewModel : ObservableObject
     {
         private readonly IRepository<Category> _categoryRepository;
+        private readonly IRepository<Transaction> _transactionRepository;
+        private readonly IRepository<Mapping> _mappingRepository;
 
         [ObservableProperty]
         private string _newCategoryName;
@@ -20,9 +22,14 @@ namespace MoneyBoard.ViewModels
 
         public ObservableCollection<Category> Categories { get; } = new();
 
-        public CategoryManagementViewModel(IRepository<Category> categoryRepository)
+        public CategoryManagementViewModel(
+            IRepository<Category> categoryRepository,
+            IRepository<Transaction> transactionRepository,
+            IRepository<Mapping> mappingRepository)
         {
             _categoryRepository = categoryRepository;
+            _transactionRepository = transactionRepository;
+            _mappingRepository = mappingRepository;
             LoadCategoriesAsync();
         }
 
@@ -85,9 +92,41 @@ namespace MoneyBoard.ViewModels
             if (category == null)
                 return;
 
-            _categoryRepository.Delete(category);
-            await _categoryRepository.SaveChangesAsync();
-            Categories.Remove(category);
+            try
+            {
+                // 1. このカテゴリーに紐づいている取引を未分類に変更
+                var relatedTransactions = await _transactionRepository.FindAsync(t => t.CategoryId == category.Id);
+                foreach (var transaction in relatedTransactions)
+                {
+                    transaction.CategoryId = null;
+                    _transactionRepository.Update(transaction);
+                }
+
+                // 2. このカテゴリーに紐づいているマッピングを削除
+                var relatedMappings = await _mappingRepository.FindAsync(m => m.CategoryId == category.Id);
+                foreach (var mapping in relatedMappings)
+                {
+                    _mappingRepository.Delete(mapping);
+                }
+
+                // 3. カテゴリー自体を削除
+                _categoryRepository.Delete(category);
+
+                // 4. すべての変更を保存
+                await _transactionRepository.SaveChangesAsync();
+                await _mappingRepository.SaveChangesAsync();
+                await _categoryRepository.SaveChangesAsync();
+
+                // 5. UIから削除
+                Categories.Remove(category);
+
+                Debug.WriteLine($"Category '{category.Name}' deleted successfully. Related transactions and mappings were updated.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to delete category: {ex.Message}");
+                await Application.Current.MainPage.DisplayAlert("Error", "カテゴリーの削除中にエラーが発生しました。", "OK");
+            }
         }
 
         /// <summary>
