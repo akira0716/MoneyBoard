@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MoneyBoard.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+    xmlns:models="clr-namespace:MoneyBoard.Models"
+    x:Name="page"
+    Title="MoneyBoard">
+
+    <Grid
+        Padding="20"
+        RowDefinitions="Auto, *, Auto"
+        RowSpacing="10">
+        <!--  Month Selection  -->
+        <Picker
+            Title="Select Month"
+            Grid.Row="0"
+            Margin="0,0,0,10"
+            ItemsSource="{Binding AvailableMonths}"
+            SelectedItem="{Binding SelectedMonth}" />
+
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,*"
+            ColumnSpacing="20">
+            <!--  Summary Display  -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!--  Fixed Header  -->
+                <Grid
+                    Grid.Row="0"
+                    Padding="15,10"
+                    BackgroundColor="#1E1E1E"
+                    ColumnDefinitions="2*,*,*,Auto">
+                    <Label
+                        Grid.Column="0"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        Text="Category"
+                        TextColor="#E0E0E0" />
+                    <Label
+                        Grid.Column="1"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        HorizontalTextAlignment="End"
+                        Text="Amount"
+                        TextColor="#E0E0E0" />
+                    <Label
+                        Grid.Column="2"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        HorizontalTextAlignment="End"
+                        Text="Percentage"
+                        TextColor="#E0E0E0" />
+                    <Label
+                        Grid.Column="3"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        HorizontalTextAlignment="Center"
+                        Text="Detail"
+                        TextColor="#E0E0E0"
+                        WidthRequest="80" />
+                </Grid>
+
+                <!--  Scrollable Content  -->
+                <CollectionView
+                    Grid.Row="1"
+                    ItemsSource="{Binding SummaryItems}"
+                    SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:CategorySummary">
+                            <Grid
+                                Margin="0,0,0,1"
+                                Padding="15,12"
+                                BackgroundColor="#2A2A2A"
+                                ColumnDefinitions="2*,*,*,Auto"
+                                ColumnSpacing="10">
+                                <Label
+                                    Grid.Column="0"
+                                    FontSize="15"
+                                    Text="{Binding CategoryName}"
+                                    TextColor="#E0E0E0"
+                                    VerticalOptions="Center" />
+                                <Label
+                                    Grid.Column="1"
+                                    FontAttributes="Bold"
+                                    FontSize="15"
+                                    HorizontalTextAlignment="End"
+                                    Text="{Binding TotalAmount, StringFormat='{0:C}'}"
+                                    TextColor="#90CAF9"
+                                    VerticalOptions="Center" />
+                                <Label
+                                    Grid.Column="2"
+                                    FontSize="15"
+                                    HorizontalTextAlignment="End"
+                                    Text="{Binding Percentage, StringFormat='{0:F1}%'}"
+                                    TextColor="#B0B0B0"
+                                    VerticalOptions="Center" />
+                                <Button
+                                    Grid.Column="3"
+                                    Padding="8,4"
+                                    Command="{Binding Source={x:Reference page}, Path=BindingContext.GoToCategoryDetailCommand}"
+                                    CommandParameter="{Binding}"
+                                    FontSize="12"
+                                    Text="詳細"
+                                    VerticalOptions="Center"
+                                    WidthRequest="70" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+
+            <lvc:PieChart Grid.Column="1" Series="{Binding Series}" />
+        </Grid>
+
+        <!--  Navigation Buttons  -->
+        <VerticalStackLayout
+            Grid.Row="2"
+            Margin="0,20,0,0"
+            Spacing="10">
+            <Grid ColumnDefinitions="2*,*" ColumnSpacing="10">
+                <Picker
+                    Title="登録する月を選択"
+                    Grid.Column="0"
+                    ItemsSource="{Binding ImportMonthOptions}"
+                    SelectedItem="{Binding SelectedImportMonth}" />
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding LoadCsvCommand}"
+                    HorizontalOptions="Fill"
+                    Text="CSVを読込" />
+            </Grid>
+
+            <Button
+                Command="{Binding GoToCategoryManagementCommand}"
+                HorizontalOptions="Fill"
+                Text="カテゴリーを管理する" />
+
+            <Button
+                Command="{Binding GoToUncategorizedTransactionsCommand}"
+                HorizontalOptions="Fill"
+                Text="未分類の取引を整理" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MoneyBoard.Views.CategoryManagementPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:MoneyBoard.Converters"
+    xmlns:models="clr-namespace:MoneyBoard.Models"
+    x:Name="page"
+    Title="Category Management">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:HexToColorConverter x:Key="HexToColorConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <Grid
+        Padding="20"
+        RowDefinitions="Auto, Auto, *"
+        RowSpacing="10">
+        <Label
+            Grid.Row="0"
+            FontAttributes="Bold"
+            FontSize="Large"
+            Text="Manage Categories" />
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,Auto,Auto"
+            ColumnSpacing="10">
+            <Entry
+                Grid.Column="0"
+                Placeholder="Enter new category name"
+                Text="{Binding NewCategoryName}" />
+            <Entry
+                Grid.Column="1"
+                Placeholder="#RRGGBB"
+                Text="{Binding CategoryColor}"
+                WidthRequest="100" />
+            <Button
+                Grid.Column="2"
+                Command="{Binding AddCategoryCommand}"
+                Text="Add" />
+        </Grid>
+        <CollectionView
+            Grid.Row="2"
+            Margin="10"
+            ItemsSource="{Binding Categories}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid
+                        Padding="10"
+                        ColumnDefinitions="Auto,*,Auto"
+                        ColumnSpacing="10">
+                        <!--  カテゴリカラー表示  -->
+                        <BoxView
+                            Grid.Column="0"
+                            CornerRadius="5"
+                            HeightRequest="30"
+                            VerticalOptions="Center"
+                            WidthRequest="30">
+                            <BoxView.Color>
+                                <Binding Path="ColorHex">
+                                    <Binding.Converter>
+                                        <converters:HexToColorConverter />
+                                    </Binding.Converter>
+                                </Binding>
+                            </BoxView.Color>
+                        </BoxView>
+                        <!--  カテゴリ名  -->
+                        <Label
+                            Grid.Column="1"
+                            FontSize="16"
+                            Text="{Binding Name}"
+                            VerticalOptions="Center" />
+                        <!--  削除ボタン  -->
+                        <Button
+                            Grid.Column="2"
+                            Command="{Binding Source={x:Reference page}, Path=BindingContext.DeleteCategoryCommand}"
+                            CommandParameter="{Binding}"
+                            Text="Delete"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>
