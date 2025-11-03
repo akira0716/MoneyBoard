@@ -45,7 +45,16 @@ namespace MoneyBoard
             builder.Services.AddTransient<ViewModels.CategoryDetailViewModel>();
             builder.Services.AddTransient<Views.CategoryDetailPage>();
 
-            return builder.Build();
+            var app = builder.Build();
+            // データベース初期化
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<ApplicationDbContext>();
+                DbInitializer.Initialize(context);
+            }
+
+            return app;
         }
     }
 }

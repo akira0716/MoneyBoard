@@ -8,8 +8,6 @@ namespace MoneyBoard
         {
             InitializeComponent();
 
-            context.Database.EnsureCreated();
-
             MainPage = new AppShell();
         }
     }
