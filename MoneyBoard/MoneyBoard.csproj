@@ -38,13 +38,14 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 		<DefaultLanguage>ja</DefaultLanguage>
 		<GenerateAppInstallerFile>True</GenerateAppInstallerFile>
-		<AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
+		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
 		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
 		<AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
 		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
 		<GenerateTestArtifacts>True</GenerateTestArtifacts>
-		<AppInstallerUri>https://drive.google.com/drive/folders/1nu3M3fFRjG3Pg6F4Qkve-j2axlsJiCU2</AppInstallerUri>
+		<AppInstallerUri>D:\MAUI_APP</AppInstallerUri>
 		<HoursBetweenUpdateChecks>24</HoursBetweenUpdateChecks>
+		<PackageCertificateThumbprint>F27AC41F8B0DE7D9AABA4EFB3A351747CB735BD8</PackageCertificateThumbprint>
 	</PropertyGroup>
 
 	<ItemGroup>
